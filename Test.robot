@@ -7,7 +7,7 @@ ${BROWSER}        Edge
 ${LOGIN URL}      https://fekmitl.pythonanywhere.com/kratai-bin
 ${ORDER URL}      https://fekmitl.pythonanywhere.com/kratai-bin/order
 ${CHECKOUT URL}   https://fekmitl.pythonanywhere.com/kratai-bin/confirm
-
+${PAYMENT URL}    https://fekmitl.pythonanywhere.com/kratai-bin/pay
 
 *** Keywords ***
 Validate Order Page ${num_tum_thai} ${num_tum_poo}
@@ -124,17 +124,13 @@ Case 6: Add 3 tum thai, 2 tum poo and check out
     Click Element    id=add_tum_poo
     Click Element    id=add_tum_poo
 
-    ${num_tum_thai}   Get Value    id=txt_tum_thai
-    ${num_tum_poo}    Get Value    id=txt_tum_poo
-
     Click Element    id=btn_check_out
-    Wait Until Location Contains    ${CHECKOUT URL}
 
     Validate Checkout Page 3 2
 
     [Teardown]    Close Browser
 
-Case 7: Add 3 tum thai, 2 tum poo, check out and change order
+Case 7: Add 3 tum thai, 3 tum poo, check out and change order
     Open Browser    ${LOGIN URL}    ${BROWSER}
     Title Should Be    Kratai Bin
     Wait Until Element Is Visible    id=start
@@ -147,12 +143,82 @@ Case 7: Add 3 tum thai, 2 tum poo, check out and change order
     Click Element    id=add_tum_thai
     Click Element    id=add_tum_poo
     Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
 
     Click Element    id=btn_check_out
-    Wait Until Location Contains    ${CHECKOUT URL}
+
+    Validate Checkout Page 3 3
 
     Click Element    id=btn_change
     Wait Until Location Is    ${ORDER URL}
+
+    [Teardown]    Close Browser
+
+Case 8: Add 3 tum thai, 3 tum poo, check out and confirm with invalid credit card 3 times
+    Open Browser    ${LOGIN URL}    ${BROWSER}
+    Title Should Be    Kratai Bin
+    Wait Until Element Is Visible    id=start
+    Click Element    id=start
+
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+
+    Click Element    id=btn_check_out
+
+    Validate Checkout Page 3 3
+
+    Click Element    id=btn_confirm
+    Wait Until Location Contains    ${PAYMENT URL}
+    Click Element    id=btn_pay
+    Wait Until Element Is Visible    id=msg_error
+    ${error_message}      Get Text     id=msg_error
+    Should Be Equal as Strings     ${error_message}  ERROR: Payment failed. 2 retries remaining.
+    Click Element    id=btn_pay
+    Wait Until Element Is Visible    id=msg_error
+    ${error_message}      Get Text     id=msg_error
+    Should Be Equal as Strings     ${error_message}  ERROR: Payment failed. 1 retries remaining.
+    Click Element    id=btn_pay
+    Wait Until Element Is Visible    id=start
+
+    [Teardown]    Close Browser
+
+Case 9: Add 3 tum thai, 3 tum poo, check out and confirm with invalid credit card 1 times then valid credit card
+    Open Browser    ${LOGIN URL}    ${BROWSER}
+    Title Should Be    Kratai Bin
+    Wait Until Element Is Visible    id=start
+    Click Element    id=start
+
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+
+    Click Element    id=btn_check_out
+
+    Validate Checkout Page 3 3
+
+    Click Element    id=btn_confirm
+    Wait Until Location Contains    ${PAYMENT URL}
+    Click Element    id=btn_pay
+    Wait Until Element Is Visible    id=msg_error
+    ${error_message}      Get Text     id=msg_error
+    Should Be Equal as Strings     ${error_message}  ERROR: Payment failed. 2 retries remaining.
+
+    Input Text    name=txt_credit_card_num     1234567890
+    Input Text    name=txt_name_on_card     John Doe
+    Click Element    id=btn_pay
+
+    Sleep    11
 
     [Teardown]    Close Browser
 
