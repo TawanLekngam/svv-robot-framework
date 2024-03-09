@@ -8,6 +8,7 @@ ${LOGIN URL}      https://fekmitl.pythonanywhere.com/kratai-bin
 ${ORDER URL}      https://fekmitl.pythonanywhere.com/kratai-bin/order
 ${CHECKOUT URL}   https://fekmitl.pythonanywhere.com/kratai-bin/confirm
 ${PAYMENT URL}    https://fekmitl.pythonanywhere.com/kratai-bin/pay
+${CHECKCOLLECT URL}    https://fekmitl.pythonanywhere.com/kratai-bin/check_collect
 
 *** Keywords ***
 Validate Order Page ${num_tum_thai} ${num_tum_poo}
@@ -252,5 +253,43 @@ Case 10: Comfirm with valid credit card
     Wait Until Location Contains    ${LOGIN URL}
     ${clear_message}      Get Text     id=msg_clearing
     Should Be Equal as Strings     ${clear_message}  Clearing in progress. Please wait.
+
+    [Teardown]    Close Browser
+
+Case 11: Collecting order
+    Open Browser    ${LOGIN URL}    ${BROWSER}
+    Title Should Be    Kratai Bin
+    Wait Until Element Is Visible    id=start
+    Click Element    id=start
+
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+
+    Click Element    id=btn_check_out
+
+    Validate Checkout Page 3 3
+
+    Click Element    id=btn_confirm
+    Wait Until Location Contains    ${PAYMENT URL}
+    Input Text    name=txt_credit_card_num     1234567890
+    Input Text    name=txt_name_on_card     John Doe
+    Click Element    id=btn_pay
+
+    Sleep    1
+
+    Click Element    class=ImgTumPoo
+    Click Element    class=ImgTumPoo
+    Click Element    class=ImgTumPoo
+    Click Element    class=ImgTumThai
+    Click Element    class=ImgTumThai
+    Click Element    class=ImgTumThai
+
+    Wait Until Location Contains    ${CHECKCOLLECT URL}
 
     [Teardown]    Close Browser
