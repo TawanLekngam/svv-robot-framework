@@ -154,7 +154,7 @@ Case 7: Add 3 tum thai, 3 tum poo, check out and change order
 
     [Teardown]    Close Browser
 
-Case 8: Add 3 tum thai, 3 tum poo, check out and confirm with invalid credit card 3 times
+Case 8: Confirm with invalid credit card 3 times
     Open Browser    ${LOGIN URL}    ${BROWSER}
     Title Should Be    Kratai Bin
     Wait Until Element Is Visible    id=start
@@ -188,7 +188,7 @@ Case 8: Add 3 tum thai, 3 tum poo, check out and confirm with invalid credit car
 
     [Teardown]    Close Browser
 
-Case 9: Add 3 tum thai, 3 tum poo, check out and confirm with invalid credit card 1 times then valid credit card
+Case 9: Confirm with invalid credit card 1 times then valid credit card
     Open Browser    ${LOGIN URL}    ${BROWSER}
     Title Should Be    Kratai Bin
     Wait Until Element Is Visible    id=start
@@ -222,3 +222,35 @@ Case 9: Add 3 tum thai, 3 tum poo, check out and confirm with invalid credit car
 
     [Teardown]    Close Browser
 
+Case 10: Comfirm with valid credit card
+    Open Browser    ${LOGIN URL}    ${BROWSER}
+    Title Should Be    Kratai Bin
+    Wait Until Element Is Visible    id=start
+    Click Element    id=start
+
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+
+    Click Element    id=btn_check_out
+
+    Validate Checkout Page 3 3
+
+    Click Element    id=btn_confirm
+    Wait Until Location Contains    ${PAYMENT URL}
+    Input Text    name=txt_credit_card_num     1234567890
+    Input Text    name=txt_name_on_card     John Doe
+    Click Element    id=btn_pay
+
+    Sleep    11
+
+    Wait Until Location Contains    ${LOGIN URL}
+    ${clear_message}      Get Text     id=msg_clearing
+    Should Be Equal as Strings     ${clear_message}  Clearing in progress. Please wait.
+
+    [Teardown]    Close Browser
