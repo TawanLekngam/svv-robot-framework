@@ -8,42 +8,63 @@ ${LOGIN URL}      https://fekmitl.pythonanywhere.com/kratai-bin
 ${ORDER URL}      https://fekmitl.pythonanywhere.com/kratai-bin/order
 ${CHECKOUT URL}   https://fekmitl.pythonanywhere.com/kratai-bin/confirm
 
+
 *** Keywords ***
-Validate Order Page
-    Wait Until Location Contains   ${ORDER URL}
-    ${num_tum_thai}   Get Value    id=txt_tum_thai
-    Should Be Equal As Integers    ${num_tum_thai}    0
-    ${num_tum_poo}    Get Value    id=txt_tum_poo
-    Should Be Equal As Integers    ${num_tum_poo}    0
+Validate Order Page ${num_tum_thai} ${num_tum_poo}
+    Wait Until Location Is   ${ORDER URL}
+    ${num_tum_thai_order}   Get Value    id=txt_tum_thai
+    Should Be Equal As Integers    ${num_tum_thai_order}    ${num_tum_thai}
+    ${num_tum_poo_order}    Get Value    id=txt_tum_poo
+    Should Be Equal As Integers    ${num_tum_poo_order}    ${num_tum_poo}
+
+Validate Checkout Page ${num_tum_thai} ${num_tum_poo}
+    Wait Until Location Contains    ${CHECKOUT URL}
+    ${num_tum_thai_checkout}   Get Text    id=msg_num_tum_thai
+    Should Be Equal As Integers    ${num_tum_thai_checkout}    ${num_tum_thai}
+    ${num_tum_poo_checkout}    Get Text    id=msg_num_tum_poo
+    Should Be Equal As Integers    ${num_tum_poo_checkout}    ${num_tum_poo}
 
 *** Test Cases ***
-Case 1: Add 4 tum thai
+Case 1: Add 4 tum thai and error
     Open Browser    ${LOGIN URL}    ${BROWSER}
     Title Should Be    Kratai Bin
     Wait Until Element Is Visible    id=start
     Click Element    id=start
 
-    Wait Until Location Is   ${ORDER URL}
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Alert Should Be Present
+
+    [Teardown]    Close Browser
+
+Case 2: Add 3 Tum Thai without error
+    Open Browser    ${LOGIN URL}    ${BROWSER}
+    Title Should Be    Kratai Bin
+    Wait Until Element Is Visible    id=start
+    Click Element    id=start
+
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    
     ${num_tum_thai}   Get Value    id=txt_tum_thai
-    Should Be Equal As Integers    ${num_tum_thai}    0
-    ${num_tum_poo}    Get Value    id=txt_tum_poo
-    Should Be Equal As Integers    ${num_tum_poo}    0
-
-    Click Element    id=add_tum_thai
-    Click Element    id=add_tum_thai
-    Click Element    id=add_tum_thai
-    Click Element    id=add_tum_thai
-    Alert Should Be Present
+    Should Be Equal As Integers    ${num_tum_thai}    3
 
     [Teardown]    Close Browser
 
-Case 2: Add 4 tum poo
+Case 3: Add 4 tum poo and error
     Open Browser    ${LOGIN URL}    ${BROWSER}
     Title Should Be    Kratai Bin
     Wait Until Element Is Visible    id=start
     Click Element    id=start
 
-    Validate Order Page
+    Validate Order Page 0 0
 
     Click Element    id=add_tum_poo
     Click Element    id=add_tum_poo
@@ -53,13 +74,30 @@ Case 2: Add 4 tum poo
 
     [Teardown]    Close Browser
 
-Case 3: Add 3 tum thai, 2 tum poo and cancel
+Case 4: Add 3 tum poo without error
     Open Browser    ${LOGIN URL}    ${BROWSER}
     Title Should Be    Kratai Bin
     Wait Until Element Is Visible    id=start
     Click Element    id=start
 
-    Validate Order Page
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+
+    ${num_tum_poo}   Get Value    id=txt_tum_poo
+    Should Be Equal As Integers    ${num_tum_poo}    3
+
+    [Teardown]    Close Browser
+
+Case 5: Add 3 tum thai, 2 tum poo and cancel
+    Open Browser    ${LOGIN URL}    ${BROWSER}
+    Title Should Be    Kratai Bin
+    Wait Until Element Is Visible    id=start
+    Click Element    id=start
+
+    Validate Order Page 0 0
 
     Click Element    id=add_tum_thai
     Click Element    id=add_tum_thai
@@ -72,13 +110,37 @@ Case 3: Add 3 tum thai, 2 tum poo and cancel
 
     [Teardown]    Close Browser
 
-Case 4: Add 3 tum thai, 2 tum poo and check out
+Case 6: Add 3 tum thai, 2 tum poo and check out
     Open Browser    ${LOGIN URL}    ${BROWSER}
     Title Should Be    Kratai Bin
     Wait Until Element Is Visible    id=start
     Click Element    id=start
 
-    Validate Order Page
+    Validate Order Page 0 0
+
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_thai
+    Click Element    id=add_tum_poo
+    Click Element    id=add_tum_poo
+
+    ${num_tum_thai}   Get Value    id=txt_tum_thai
+    ${num_tum_poo}    Get Value    id=txt_tum_poo
+
+    Click Element    id=btn_check_out
+    Wait Until Location Contains    ${CHECKOUT URL}
+
+    Validate Checkout Page 3 2
+
+    [Teardown]    Close Browser
+
+Case 7: Add 3 tum thai, 2 tum poo, check out and change order
+    Open Browser    ${LOGIN URL}    ${BROWSER}
+    Title Should Be    Kratai Bin
+    Wait Until Element Is Visible    id=start
+    Click Element    id=start
+
+    Validate Order Page 0 0
 
     Click Element    id=add_tum_thai
     Click Element    id=add_tum_thai
@@ -89,6 +151,8 @@ Case 4: Add 3 tum thai, 2 tum poo and check out
     Click Element    id=btn_check_out
     Wait Until Location Contains    ${CHECKOUT URL}
 
-    [Teardown]    Close Browser
+    Click Element    id=btn_change
+    Wait Until Location Is    ${ORDER URL}
 
+    [Teardown]    Close Browser
 
